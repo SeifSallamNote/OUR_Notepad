@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.undo.UndoManager;
 
 //import p1.FontChooser;
 //import p1.FontDialog;
@@ -249,6 +250,7 @@ public class Notepad implements ActionListener, MenuConstants {
 	JFrame f;
 	JTextArea ta;
 	JLabel statusBar;
+	UndoManager undoManager = new UndoManager();
 
 	private String fileName = "Untitled";
 	private boolean saved = true;
@@ -304,6 +306,13 @@ public class Notepad implements ActionListener, MenuConstants {
 				statusBar.setText("||       Ln " + (lineNumber + 1) + ", Col " + (column + 1));
 			}
 		});
+		
+		ta.getDocument().addUndoableEditListener(
+		        new UndoableEditListener() {
+		          public void undoableEditHappened(UndoableEditEvent e) {
+		            undoManager.addEdit(e.getEdit());
+		          }
+		        });
 //////////////////
 		DocumentListener myListener = new DocumentListener() {
 			public void changedUpdate(DocumentEvent e) {
@@ -452,7 +461,22 @@ public class Notepad implements ActionListener, MenuConstants {
 ////////////////////////////////////
 		else if (cmdText.equals(helpAboutNotepad)) {
 			JOptionPane.showMessageDialog(Notepad.this.f, aboutText, "Dedicated 2 u!", JOptionPane.INFORMATION_MESSAGE);
-		} else
+		}
+		else if (cmdText.equals(editUndo)) {
+			try {
+		          undoManager.undo();
+		        } catch (Exception e) {
+		          System.out.println("Undo limit reached, nothing will happen.");
+		        }
+		}
+		else if (cmdText.equals(editRedo)) {
+			try {
+		          undoManager.redo();
+		        } catch (Exception e) {
+		          System.out.println("Redo limit reached, nothing will happen.");
+		        }
+		}
+			else
 			statusBar.setText("This " + cmdText + " command is yet to be implemented");
 	}// action Performed
 ////////////////////////////////////
@@ -547,7 +571,9 @@ public class Notepad implements ActionListener, MenuConstants {
 		createMenuItem(fileExit, KeyEvent.VK_X, fileMenu, this);
 
 		temp = createMenuItem(editUndo, KeyEvent.VK_U, editMenu, KeyEvent.VK_Z, this);
-		temp.setEnabled(false);
+		temp.setEnabled(true);
+		temp = createMenuItem(editRedo, KeyEvent.VK_U, editMenu, KeyEvent.VK_Y, this);
+		temp.setEnabled(true);
 		editMenu.addSeparator();
 		cutItem = createMenuItem(editCut, KeyEvent.VK_T, editMenu, KeyEvent.VK_X, this);
 		copyItem = createMenuItem(editCopy, KeyEvent.VK_C, editMenu, KeyEvent.VK_C, this);
@@ -571,6 +597,7 @@ public class Notepad implements ActionListener, MenuConstants {
 		formatMenu.addSeparator();
 		createMenuItem(formatForeground, KeyEvent.VK_T, formatMenu, this);
 		createMenuItem(formatBackground, KeyEvent.VK_P, formatMenu, this);
+	
 
 		createCheckBoxMenuItem(viewStatusBar, KeyEvent.VK_S, viewMenu, this).setSelected(true);
 		/************
@@ -644,6 +671,7 @@ interface MenuConstants {
 	final String fileExit = "Exit";
 
 	final String editUndo = "Undo";
+	final String editRedo = "Redo";
 	final String editCut = "Cut";
 	final String editCopy = "Copy";
 	final String editPaste = "Paste";
