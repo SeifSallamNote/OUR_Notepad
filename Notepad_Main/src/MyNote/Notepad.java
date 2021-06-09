@@ -4,6 +4,9 @@ import java.io.*;
 import java.util.Date;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -23,6 +26,7 @@ class FileOperation {
 
 	File fileRef;
 	JFileChooser chooser;
+	ASCIIWriter ascii = new ASCIIWriter();
 
 /////////////////////////////
 	boolean isSave() {
@@ -165,17 +169,29 @@ class FileOperation {
 					"Open", JOptionPane.INFORMATION_MESSAGE);
 
 		} while (true);
-
-		this.npd.ta.setText("");
-
-		if (!openFile(temp)) {
-			fileName = "Untitled";
-			saved = true;
-			this.npd.f.setTitle(fileName + " - " + applicationTitle);
+		try {
+			if(ImageIO.read(temp) != null)
+			{
+				BufferedImage img = ImageIO.read(temp);
+				this.npd.ta.setText(ascii.WriteTXT(img));
+				updateStatus(temp, true);
+				this.npd.ta.setCaretPosition(0);
+			}
+			else {
+				this.npd.ta.setText("");
+				if (!openFile(temp)) {
+					fileName = "Untitled";
+					saved = true;
+					this.npd.f.setTitle(fileName + " - " + applicationTitle);
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 		if (!temp.canWrite())
 			newFileFlag = true;
-
 	}
 
 ////////////////////////
