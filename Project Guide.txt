@@ -1,0 +1,9 @@
+How to create a new menu item
+---------------------------------------
+1- Go to the end of Notepad.java and add the name of your item in a variable in "MenuConstants" interface
+2- Go to the function "CreateMenuBar(JFrame f)" and create your item according to the following format
+of createMenuItem : (String name, KeyEvent.VK_{Any available key} (keyboard shortcut), 
+(The appropriate menu), this);
+3- Go to the function "actionPerformed(ActionEvent ev)" and create an extra "else if" with cmdText having
+your String as a parameter
+4- Implement your function in there
