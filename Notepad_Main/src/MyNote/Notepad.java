@@ -2,6 +2,8 @@ package MyNote;
 
 import java.io.*;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -16,6 +18,8 @@ import javax.swing.undo.UndoManager;
 //import p1.FindDialog;
 //import p1.LookAndFeelMenu;
 //import p1.MyFileFilter;
+/************************************/
+
 /************************************/
 class FileOperation {
 	Notepad npd;
@@ -63,7 +67,7 @@ class FileOperation {
 
 	}
 //////////////////////////////////////
-
+	
 	boolean saveFile(File temp) {
 		FileWriter fout = null;
 		try {
@@ -258,7 +262,9 @@ public class Notepad implements ActionListener, MenuConstants {
 
 	String searchString, replaceString;
 	int lastSearchIndex;
-
+	
+	Timer timer;
+	
 	FileOperation fileHandler;
 	FontChooser fontDialog = null;
 	FindDialog findReplaceDialog = null;
@@ -358,7 +364,11 @@ public class Notepad implements ActionListener, MenuConstants {
 		} catch (Exception e) {
 		}
 	}
-
+	class myAutoSaver extends TimerTask {
+		public void run() {
+			fileHandler.saveThisFile();
+		}
+	}
 ///////////////////////////////////
 	public void actionPerformed(ActionEvent ev) {
 		String cmdText = ev.getActionCommand();
@@ -374,6 +384,21 @@ public class Notepad implements ActionListener, MenuConstants {
 		else if (cmdText.equals(fileSaveAs))
 			fileHandler.saveAsFile();
 ////////////////////////////////////
+		else if (cmdText.equals(fileAutoSave)) {
+			JCheckBoxMenuItem temp = (JCheckBoxMenuItem) ev.getSource();
+			boolean checker=temp.isSelected();
+			if (checker)
+			{
+				timer=new Timer();
+				timer.schedule(new myAutoSaver(), 0 , 600000);
+			}
+			else 
+			{
+				timer.cancel();
+				timer.purge();
+			}
+		}
+///////////////////////////////////
 		else if (cmdText.equals(fileExit)) {
 			if (fileHandler.confirmSave())
 				System.exit(0);
@@ -563,6 +588,7 @@ public class Notepad implements ActionListener, MenuConstants {
 		createMenuItem(fileOpen, KeyEvent.VK_O, fileMenu, KeyEvent.VK_O, this);
 		createMenuItem(fileSave, KeyEvent.VK_S, fileMenu, KeyEvent.VK_S, this);
 		createMenuItem(fileSaveAs, KeyEvent.VK_A, fileMenu, this);
+		createCheckBoxMenuItem(fileAutoSave,KeyEvent.VK_V, fileMenu, this);
 		fileMenu.addSeparator();
 		temp = createMenuItem(filePageSetup, KeyEvent.VK_U, fileMenu, this);
 		temp.setEnabled(false);
@@ -666,6 +692,7 @@ interface MenuConstants {
 	final String fileOpen = "Open...";
 	final String fileSave = "Save";
 	final String fileSaveAs = "Save As...";
+	final String fileAutoSave = "Autosave";
 	final String filePageSetup = "Page Setup...";
 	final String filePrint = "Print";
 	final String fileExit = "Exit";
